@@ -1,8 +1,11 @@
+import 'package:chat_app/src/helpers/mostrar_alertas.dart';
+import 'package:chat_app/src/services/auth_service.dart';
 import 'package:chat_app/src/widgets/button_green.dart';
 import 'package:chat_app/src/widgets/custom_input.dart';
 import 'package:chat_app/src/widgets/labels.dart';
 import 'package:chat_app/src/widgets/logo.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 
 class LoginPage extends StatelessWidget {
@@ -49,6 +52,9 @@ class __FormLoginState extends State<_FormLogin> {
   final passCtrl  = TextEditingController();
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: EdgeInsets.only(top: 40),
       padding: EdgeInsets.symmetric(horizontal: 30),
@@ -68,9 +74,18 @@ class __FormLoginState extends State<_FormLogin> {
              isPassword: true,
            ),
            ButtonGreen(
-             onPressed: () {
-               print(emailCtrl.text);
-               print(passCtrl.text);
+             onPressed: authService.autenticando? null : () async {
+               print(emailCtrl.text.trim());
+               print(passCtrl.text.trim());
+               FocusScope.of(context).unfocus();
+               final loginOk = await authService.login(emailCtrl.text.trim(), passCtrl.text.trim());
+               if ( loginOk ) {
+                 // Navegar a otra pantalla
+                 Navigator.pushReplacementNamed(context, 'usuarios');
+               } else {
+                 //  mostrar alerta
+                 mostrarAlerta(context, 'Login Incorrecto', 'Las credenciales no son correctas!');
+               }
              }, 
              text: 'INGRESAR',
            )
